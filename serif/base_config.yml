@@ -1,0 +1,12 @@
+markdown:
+  extensions:
+    - extra
+    - smarty
+    - codehilite
+    - headerid
+    - toc
+    - outline
+  extension_configs:
+    toc: 
+      marker: \toc()
+      title: Table of Contents

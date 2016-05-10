@@ -1,4 +1,5 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
 setup(name='serif',
       version='0.1',
       description='Thijs\' typesetter',
@@ -11,8 +12,15 @@ setup(name='serif',
         'mdx_outline',
         'PyExecJS',
         'Jinja2',
+        'click',
+        'pyyaml',
+        'pygments',
       ],
+      entry_points="""
+        [console_scripts]
+        serif=serif:cli
+      """,
       dependency_links=[
         'https://github.com/tvogels/svgmath',
       ],
-      packages=['serif'])
+      packages=find_packages())

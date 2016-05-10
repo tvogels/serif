@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^0.20.0",
-    "citeproc": "^1.0.6"
+    "citeproc": "^1.0.6",
+    "yamljs": "^0.2.7"
   }
 }

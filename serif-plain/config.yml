@@ -26,12 +26,12 @@ counting:
     - .section4
 paper-size: A4
 font:
-  family: Helvetica
+  family: Bitstream Charter
   size: 11pt
-toc:
-  enabled: true
 math:
   enabled: true
   scale: 1.06
-  font-family: Helvetica
+  font-family: Bitstream Charter
   display-alignment: left # left / center
+comments:
+  enabled: true

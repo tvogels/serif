@@ -7,10 +7,11 @@ setup(name='serif',
       url='https://github.com/tvogels/serif',
       license='MIT',
       dependencies=[
-        'mdx_sections'
+        'markdown',
+        'mdx_sections',
+        'PyExecJS',
       ],
       dependency_links=[
         'https://github.com/tvogels/svgmath',
-        'https://github.com/brechtm/citeproc-py'
       ],
       packages=['serif'])

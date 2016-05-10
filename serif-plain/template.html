@@ -3,13 +3,16 @@
 <html lang="{{config.language | e}}">
 
 <head>
-	<title>{{config.title | e}}</title>
-	<meta name="author" content="{{config.author | e}}">
+<title>{{config.title | e}}</title>
+<meta name="author" content="{{config.author | e}}">
+<style>
+{{css}}
+</style>
 </head>
 
 <body>
-	<h1>{{config.title | e}}</h1>
-	{{body}}
+<h1>{{config.title | e}}</h1>
+{{body}}
 </body>
 
 </html>

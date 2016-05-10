@@ -4,11 +4,15 @@ import re
 import click
 import yaml
 import sys, os
-from util import merge_dictionaries, get
+from util import merge_dictionaries, get, which
 import jinja2
 import execjs
 import json
 from copy import copy
+import tempfile
+import shutil
+import subprocess
+DEVNULL = open(os.devnull, 'wb')
 
 LINK_FILE_JS = os.path.join(os.path.dirname(__file__), "link.js")
 
@@ -38,7 +42,7 @@ def read_config(markdown):
   """
   Read the configuration block at the top of a serif input file
   """
-  regex = re.compile(r'-{3,}\n(.*?)\n-{3,}\n(.*)$', 
+  regex = re.compile(r'-{3,}\n(.*?)\n-{3,}\n(.*)$',
                      re.MULTILINE|re.DOTALL)
   m = regex.match(markdown)
 
@@ -58,7 +62,7 @@ def resolve_config(document_config, theme_config, serif_config=None):
     serif_config = yaml.load(file(f, 'r'))
 
   merged = merge_dictionaries(
-             merge_dictionaries(serif_config, theme_config), 
+             merge_dictionaries(serif_config, theme_config),
              document_config
            )
 
@@ -80,7 +84,7 @@ def get_markdown(config):
   extensions.append(SerifExtension(config))
   try:
     return markdown.Markdown(
-      extensions = extensions, 
+      extensions = extensions,
       extension_configs = extconfigs
     )
   except RuntimeError as e:
@@ -100,45 +104,125 @@ def get_jinja(config):
 def get_linker(config):
   with open(LINK_FILE_JS, 'r') as f:
     js_script = f.read()
-  
+
   # Inject config
-  js_script = js_script.replace('[[CONFIG_PLACEHOLDER]]', json.dumps(config))
+  js_script = js_script.replace(
+    '[[CONFIG_PLACEHOLDER]]',
+    json.dumps(config), 1
+  )
+  js_script = js_script.replace(
+    '[[SERIF_ROOT]]',
+    os.path.join(os.path.dirname(__file__), '..')
+  )
+  js_script = js_script.replace(
+    '[[WORKING_DIRECTORY]]',
+    os.getcwd(), 1
+  )
 
   # Inject path
   path_script = """
   module.paths.push('%s');
-  """ % os.path.join(os.path.dirname(__file__),'node_modules')
+  module.paths.push('%s');
+  """ % (os.path.join(os.path.dirname(__file__),'node_modules'),
+         os.path.join(os.path.dirname(__file__),'vendor'))
   js_script = path_script + js_script
 
   context = execjs.compile(js_script)
   return lambda html: context.call('link', html)
-  
+
 
 
 @click.command()
-@click.argument('input_file', type=click.File('r'))
+@click.argument('input_path', type=click.Path(exists=True))
 @click.option('--keep-html/--no-keep-html', default=False)
-def cli(input_file, keep_html):
-  # Read configuration block
-  config, body = read_config(input_file.read())
+def cli(input_path, keep_html):
 
-  # Check if a theme is provided
-  if 'theme' not in config:
-    terminate("Please specify a theme in the YAML configuration on top of the file.")
+  if not which('stylus'):
+    terminate("I cannot find the stylus binary.")
 
-  # Load the theme
-  theme = __import__(config['theme'])
-  
-  # Merge configurations at global, theme and document levels
-  config = resolve_config(config, theme.config)
+  if not which('prince'):
+    terminate("I cannot find the Prince binary.")
 
-  # Create toolset for the theme to work with
-  toolset = {
-    'markdown': get_markdown(config).convert if 'markdown' in config and config['markdown'] else None,
-    'jinja': get_jinja(config),
-    'link': get_linker(config)
-  }
+  file_base = os.path.splitext(input_path)[0]
 
-  # print(body)
-  print(toolset['link'](toolset['markdown'](body)))
-  # print(toolset['link'](toolset['markdown'](body)))
+  with open(input_path, 'r') as input_file:
+
+    # Read configuration block
+    config, body = read_config(input_file.read())
+
+    # Check if a theme is provided
+    if 'theme' not in config:
+      terminate("Please specify a theme in the YAML configuration on top of the file.")
+
+    # Load the theme
+    click.echo("Loading theme")
+    theme = __import__(config['theme'])
+
+    # Merge configurations at global, theme and document levels
+    config = resolve_config(config, theme.config)
+
+    # Create toolset for the theme to work with
+    click.echo("Loading toolset")
+    toolset = {
+      'markdown': get_markdown(config).convert if 'markdown' in config and config['markdown'] else None,
+      'jinja': get_jinja(config),
+      'link': get_linker(config)
+    }
+
+    # Make a temporary directory
+    try:
+      tmpdir = tempfile.mkdtemp()
+
+      # Render the css
+      click.echo("Rendering stylesheet")
+      base_style  = os.path.join(os.path.dirname(__file__), 'base_styles.styl')
+      theme_style = os.path.join(theme.directory, 'theme.styl')
+      config_file = os.path.join(tmpdir, "config.js")
+      with open(config_file, 'w') as cf:
+        cf.write("""
+        data = %s;
+        module.exports = exports = function () {
+          return function (style) {
+            function define(data, prefix) {
+              for (var key in data) {
+                if (typeof data[key] === "object")
+                  define(data[key], prefix + key + '_');
+                else
+                  style.define(prefix + key, data[key]);
+              }
+            }
+
+            define(data, "config_");
+          };
+        };
+        """ % json.dumps(config))
+      subprocess.check_call(['stylus',
+                             '--import', base_style,
+                             theme_style,
+                             '--out', tmpdir,
+                             '--use', config_file], stdout=DEVNULL)
+
+      with open(os.path.join(tmpdir, "theme.css"), 'r') as cssfile:
+        css = cssfile.read()
+
+      click.echo("Running the theme")
+      html = theme.render_html(toolset, config, body, css)
+
+      if keep_html:
+        html_location = '%s.html' % file_base
+      else:
+        html_location = os.path.join(tmpdir, "doc.html")
+
+      # Write HTML to file
+      with open(html_location, 'w') as f:
+        f.write(html)
+
+      pdf_location = '%s.pdf' % file_base
+
+      # Run Prince XML
+      click.echo("Running Prince")
+      subprocess.check_call(['prince', html_location, pdf_location], stdout=DEVNULL)
+
+    finally:
+      shutil.rmtree(tmpdir)
+

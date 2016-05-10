@@ -1,25 +1,23 @@
 import os
-from jinja2 import Environment, FileSystemLoader
-
-# Load Jinja2 environment for template rendering
-SERIF_ROOT = os.path.join(os.path.dirname(__file__), "..")
-jinja_env = Environment(loader=FileSystemLoader(SERIF_ROOT))
-
+import click
 
 """
-Main function of the style, 
+Main function of the style,
 should take the page body and return HTML
 """
 def render_html(serif, config, body, css):
 
-	# Run Markdown
-	html_body = serif.markdown(body)
+  # Run Markdown
+  click.echo("Running markdown")
+  html_body = serif['markdown'](body)
 
-	# Run template
-	template = serif.jinja.get_template("serif-plain/template.html")
-	html = template.render(body=body, css=css, config=config)
+  # Run template
+  click.echo("Rendering template")
+  template = serif['jinja'].get_template("serif-plain/template.html")
+  html = template.render(body=html_body, css=css, config=config)
 
-	# Run linking (bibliography, counters, etc.)
-	html = serif.link(html, config)
+  # Run linking (bibliography, counters, etc.)
+  click.echo("Linking")
+  html = serif['link'](html)
 
-	return html
+  return html

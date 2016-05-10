@@ -11,4 +11,5 @@ class RawPostprocessor(Postprocessor):
   def run(self, text):
     return DECODE.sub(
       lambda m: base64.b64decode(m.group(1)),
-      text)
+      text
+    )

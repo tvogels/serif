@@ -3,9 +3,15 @@ Citeproc  = require('citeproc');
 yaml      = require('yamljs');
 assert    = require('assert');
 fs        = require('fs');
+CSL       = require('citeproc').CSL;
+
 
 CONFIG = [[CONFIG_PLACEHOLDER]];
+// process.chdir("[[WORKING_DIRECTORY]]");
 
+/**
+ * Helper function to take elements from config if they exist
+ */
 function conf() {
   current = CONFIG
   for (var i = 0; i < arguments.length; i++) {
@@ -18,13 +24,31 @@ function conf() {
 }
 
 /**
+ * Load file helper
+ */
+function load(filename) {
+  return fs.readFileSync(filename, 'utf-8');
+}
+
+/**
  * Main function, takes HTML and applies all the edits to it.
  */
 function link(html) {
   const $ = Cheerio.load(html);
 
   counting($);
+
   toc($);
+
+  // Load the bibliography if desired
+  var bib = [];
+  if (conf('bibliography','enabled'))
+    bib = loadBibliography();
+
+  references($, bib);
+
+  if (conf('bibliography','enabled'))
+    citationsAndBibliography($, bib);
 
   return $.html();
 }
@@ -61,94 +85,107 @@ function toc($) {
     }
   });
 }
-
-// $ = Cheerio.load(fs.readFileSync(file, 'utf-8'));
-
-// var bibfile = yaml.parse(fs.readFileSync("../testbib.yaml", "utf-8"));
-// var locale = "en-US";
-// var style = "chicago-author-date";
-// countingConfig = {
-//   children: {
-//     'root': ['.section1'],
-//     '.section1': ['.section2','figure','theorem','table','.eqn-display[id]','listing'],
-//     '.section2': ['.section3'],
-//     '.section3': ['.section4']
-//   }
-// };
+Monkey = function() {}
+/**
+ * Load the bibliography
+ */
+function loadBibliography() {
+  return yaml.load(conf('bibliography','library'));
+}
 
 
+/**
+ * Link cross-references, and set target counters
+ */
+function references($, bib) {
+  var bibIds = Object.keys(bib);
+  // Process links & prepare simple citations (not block)
+  $("[href*='#']").each((i, reference) => {
+    $this = $(reference);
+    var targetId = $this.attr('href').substr(1);
+    var $target = $("[id='"+targetId+"']");
+    if ($target.length > 0) {
+      $this.attr('data-target-counter', $target.attr('data-counter'));
+    } else {
+      targetId = targetId.replace(/^bib:/,'');
+      // Could be bibiliography ...
+      if (bibIds.indexOf(targetId) >= 0) {
+        $this.addClass('serif-citation-t');
+        $this.attr('data-bib-id', targetId);
+        $this.attr('href', `#bib:${targetId}`)
+      } else {
+        // not found
+        $this.addClass('serif-reference-not-found');
+      }
+    }
+  });
+}
 
-// var bibIds = Object.keys(bibfile);
-// // Process links & prepare simple citations (not block)
-// $("[href*='#']").each((i, reference) => {
-//   $this = $(reference);
-//   var targetId = $this.attr('href').substr(1);
-//   var $target = $("[id='"+targetId+"']");
-//   if ($target.length > 0) {
-//     $this.attr('data-target-counter', $target.attr('data-counter'));
-//   } else {
-//     targetId = targetId.replace(/^bib:/,'');
-//     // Could be bibiliography ...
-//     if (bibIds.indexOf(targetId) >= 0) {
-//       $this.addClass('serif-citation-t');
-//       $this.attr('data-bib-id', targetId);
-//       $this.attr('href', `#bib:${targetId}`)
-//     } else {
-//       // not ofund
-//       $this.addClass('serif-reference-not-found');
-//     }
-//   }
-// });
+/**
+ * Get a configured citeproc instance
+ */
+function getCiteproc(bib) {
+  const style  = load(`[[SERIF_ROOT]]/styles/${conf('bibliography', 'style')}.csl`);
+  const locale = load(`[[SERIF_ROOT]]/locales/locales-${conf('locale').replace('_','-')}.xml`);
+  sys = {
+    retrieveLocale: function (language) {
+        return locale;
+    },
+    retrieveItem: function (id) {
+      return bib[id];
+    }
+  };
+  return new CSL.Engine(sys, style);
+}
 
-// // Do bibliography
-// // console.log(bibfile.doe99);
-// new Citeproc(bibfile,
-//              `../styles/${style}.csl`,
-//              `../locales/locales-${locale}.xml`,
-// function (citeproc) {
+/**
+ * Do all citations, blocks and simple ones, and create the bibliography
+ */
+function citationsAndBibliography($, bib) {
 
-//   var cite = (items) => {
-//     return citeproc.appendCitationCluster({
-//             citationItems: items,
-//             properties: {noteIndex: 0}
-//     });
-//   };
+  const citeproc = getCiteproc(bib);
 
-//   $(".serif-citation-block, .serif-citation-t").each((i, reference) => {
-//     $this = $(reference);
-//     var cites = [];
-//     if ($this.hasClass('serif-citation-t')) {
-//       // Vogels (2006), single
-//       cites = [{id: $this.attr('data-bib-id'), 'author-only': true}];
-//       var part1 = cite(cites)[0][1];
-//       cites = [{id: $this.attr('data-bib-id'), 'suppress-author': true}];
-//       var part2 = cite(cites)[0][1];
-//       $this.html(part1 + ' ' + part2)
-//     } else {
-//       var data = JSON.parse($this.attr('data-items'));
-//       var res = cite(data);
-//       $this.html(res[0][1]);
-//       if (data.length == 1)
-//         $this.attr('href', `#bib:${data[0].id}`)
-//       else
-//         $this.attr('href', `#serif-bibliography`)
-//     }
-//   });
-//   $bib = $('.serif-bibliography');
-//   var bibres = citeproc.makeBibliography();
-//   $bib.html(bibres[1].join(''))
-//   $bib.attr('data-maxoffset', bibres[0].maxoffset);
-//   $bib.attr('data-hangingindent', bibres[0].hangingindent);
-//   $bib.attr('data-entryspacing', bibres[0].entryspacing);
-//   $bib.attr('data-linespacing', bibres[0].linespacing);
-//   $bib.attr('data-second-field-align', bibres[0]['second-field-align']);
-//   $bib.find('[data-item-id]').each((i, elem) => {
-//     $(elem).attr('id', `bib:${$(elem).attr('data-item-id')}`);
-//   });
+  var cite = (items) => {
+    return citeproc.appendCitationCluster({
+            citationItems: items,
+            properties: {noteIndex: 0}
+    });
+  };
 
-// });
+  $(".serif-citation-block, .serif-citation-t").each((i, reference) => {
+    $this = $(reference);
+    var cites = [];
+    if ($this.hasClass('serif-citation-t')) {
+      // Vogels (2006), single
+      cites = [{id: $this.attr('data-bib-id'), 'author-only': true}];
+      var part1 = cite(cites)[0][1];
+      cites = [{id: $this.attr('data-bib-id'), 'suppress-author': true}];
+      var part2 = cite(cites)[0][1];
+      $this.html(part1 + ' ' + part2)
+    } else {
+      var data = JSON.parse($this.attr('data-items'));
+      var res = cite(data);
+      $this.html(res[0][1]);
+      if (data.length == 1)
+        $this.attr('href', `#bib:${data[0].id}`)
+      else
+        $this.attr('href', `#serif-bibliography`)
+    }
+  });
+  $bib = $('.serif-bibliography');
+  var bibres = citeproc.makeBibliography();
+  $bib.html(bibres[1].join(''))
+  $bib.attr('data-maxoffset', bibres[0].maxoffset);
+  $bib.attr('data-hangingindent', bibres[0].hangingindent);
+  $bib.attr('data-entryspacing', bibres[0].entryspacing);
+  $bib.attr('data-linespacing', bibres[0].linespacing);
+  $bib.attr('data-second-field-align', bibres[0]['second-field-align']);
 
+  $bib.find('[data-item-id]').each((i, elem) => {
+    $(elem).attr('id', `bib:${$(elem).attr('data-item-id')}`);
+  });
 
+}
 
 
 

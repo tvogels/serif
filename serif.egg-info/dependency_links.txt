@@ -1,0 +1,2 @@
+https://github.com/tvogels/svgmath
+https://github.com/brechtm/citeproc-py

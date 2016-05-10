@@ -1,0 +1,36 @@
+author: Thijs Vogels <t.vogels@me.com>
+authors:
+  - Thijs Vogels
+  - Brian McWilliams
+  - Jan Novák
+  - Fabrice Rousselle
+date: NOW
+locale: en_US
+bibliography:
+  enabled: true
+  style: chicago-author-date
+counting:
+  root:
+    - .section1
+  .section1:
+    - .section2
+    - figure
+    - theorem
+    - table
+    - .eqn-display[id]
+    - listing
+  .section2:
+    - .section3
+  .section3:
+    - .section4
+paper-size: A4
+font:
+  family: Helvetica
+  size: 11pt
+toc:
+  enabled: true
+math:
+  enabled: true
+  scale: 1.06
+  font-family: Helvetica
+  display-alignment: left # left / center

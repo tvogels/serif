@@ -1,0 +1,21 @@
+/**
+ * Show page-layout on screen
+ */
+@media screen
+  body
+    max-width 50em
+    margin 1em auto
+    padding 1em 2em
+    background-color white
+  html
+    background-color #f0f0f0
+
+/**
+ * Make links invisible in the PDF
+ */
+@media print
+  a[href]
+    color inherit !important
+    text-decoration none !important
+    display inline-block
+

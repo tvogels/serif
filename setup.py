@@ -6,7 +6,7 @@ setup(name='serif',
       author_email='t.vogels@me.com',
       url='https://github.com/tvogels/serif',
       license='MIT',
-      dependencies=[
+      install_requires=[
         'markdown',
         'mdx_sections',
         'PyExecJS',

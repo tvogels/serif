@@ -27,7 +27,11 @@ function conf() {
  * Load file helper
  */
 function load(filename) {
-  return fs.readFileSync(filename, 'utf-8');
+  try {
+    return fs.readFileSync(filename, 'utf-8');
+  } catch (e) {
+    throw `Failed to load file '${filename}'`;
+  }
 }
 
 /**
@@ -85,12 +89,17 @@ function toc($) {
     }
   });
 }
-Monkey = function() {}
+
 /**
  * Load the bibliography
  */
 function loadBibliography() {
-  return yaml.load(conf('bibliography','library'));
+  var path = conf('bibliography','library');
+  try {
+    return yaml.load(path);
+  } catch (e) {
+    throw `Failed to load bibliography file at '${path}'.`;
+  }
 }
 
 

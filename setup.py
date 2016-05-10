@@ -8,8 +8,9 @@ setup(name='serif',
       license='MIT',
       install_requires=[
         'markdown',
-        'mdx_sections',
+        'mdx_outline',
         'PyExecJS',
+        'Jinja2',
       ],
       dependency_links=[
         'https://github.com/tvogels/svgmath',

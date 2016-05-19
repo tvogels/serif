@@ -82,7 +82,7 @@ function counting($) {
  */
 function toc($) {
   $('.toc a').each((i, link) => {
-    var $this = $(link);
+    var $this = $(`[id='${link}'']`);
     var $target = $($this.attr('href'));
     if($target.hasClass('no-toc')) {
       $this.parent().remove();

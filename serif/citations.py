@@ -7,9 +7,8 @@ from markdown.util import AtomicString
 
 BLOCK_CITATION = r'\[([\w ]*.?@.+?)?\]'
 class CitationPattern(Pattern):
-
   def parseEntry(self, string):
-    m = re.match(r'([\w ]*)([-]?)@(bib:)?(\w+)(, (.*?))?(,(.*?))?$', string)
+    m = re.match(r'([\w ]*)([-]?)@(bib:)?([\w\-]+)(, (.*?))?(,(.*?))?$', string)
     if not m:
       raise ValueError("Citation '%s' could not be interpreted." % string)
     else:
@@ -43,7 +42,7 @@ class ReferencePattern(Pattern):
     el.set('href','#%s%s' % (prefix, m.group(5)))
     el.set('class', 'serif-reference')
     el.set('data-reference-type', m.group(3)[:-1] if m.group(3) else 'bib')
-    el.text = m.group(5)
+    # el.text = m.group(5)
     return el
 
 reference_pattern = ReferencePattern(SIMPLE_REFERENCE)

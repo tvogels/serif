@@ -80,17 +80,7 @@ theorem
   font-size 1.25em
   margin 1.5ex 0
   line-height $line-height
-.doc-author
-  padding 0
-  margin 0
 
-ul
-  padding 0
-  margin 0.7em 0
-  li
-    padding 0
-    margin 0
-    margin-left 1.5em
 
 
 
@@ -109,7 +99,7 @@ ul
   a
     &:before
       display inline-block
-      width 2em
+      width 3em
     &[data-target-counter]:before
       content attr(data-target-counter) ". "
 
@@ -117,14 +107,12 @@ ul
       content: leader(' . ') target-counter(attr(href),page);
   >ul>li>a
     font-weight 600
-  >ul>li>ul>li>a
-    padding-left: 2em
   >ul>li>ul>li>ul>li
     >a:before {
       width auto
       padding-right:.3em
     }
-    padding-left 4em
+    padding-left 3em
     // font-style italic
 
 .toctitle

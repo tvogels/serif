@@ -11,7 +11,9 @@ import json
 from copy import copy
 import tempfile
 import shutil
+import io
 import subprocess
+from cache import SerifCache
 DEVNULL = open(os.devnull, 'wb')
 
 LINK_FILE_JS = os.path.join(os.path.dirname(__file__), "link.js")
@@ -75,13 +77,13 @@ def resolve_config(document_config, theme_config, serif_config=None):
   return merged
 
 
-def get_markdown(config):
+def get_markdown(config, cache):
   """
   Get a configured instance of the Markdown parser
   """
   extensions = copy(config['markdown']['extensions'])
   extconfigs = copy(config['markdown']['extension_configs'])
-  extensions.append(SerifExtension(config))
+  extensions.append(SerifExtension(config, cache))
   try:
     return markdown.Markdown(
       extensions = extensions,
@@ -143,9 +145,9 @@ def cli(input_path, keep_html):
   if not which('prince'):
     terminate("I cannot find the Prince binary.")
 
-  file_base = os.path.splitext(input_path)[0]
+  file_base = os.path.splitext(os.path.abspath(input_path))[0]
 
-  with open(input_path, 'r') as input_file:
+  with io.open(input_path, 'r', encoding="utf-8") as input_file:
 
     # Read configuration block
     config, body = read_config(input_file.read())
@@ -161,10 +163,13 @@ def cli(input_path, keep_html):
     # Merge configurations at global, theme and document levels
     config = resolve_config(config, theme.config)
 
+    # Create/load the cache
+    cache = SerifCache('%s.serifcache' % file_base)
+
     # Create toolset for the theme to work with
     click.echo("Loading toolset")
     toolset = {
-      'markdown': get_markdown(config).convert if 'markdown' in config and config['markdown'] else None,
+      'markdown': get_markdown(config, cache).convert if 'markdown' in config and config['markdown'] else None,
       'jinja': get_jinja(config),
       'link': get_linker(config)
     }
@@ -202,26 +207,33 @@ def cli(input_path, keep_html):
                              '--out', tmpdir,
                              '--use', config_file], stdout=DEVNULL)
 
-      with open(os.path.join(tmpdir, "theme.css"), 'r') as cssfile:
+      with io.open(os.path.join(tmpdir, "theme.css"), 'r', encoding='utf-8') as cssfile:
         css = cssfile.read()
 
       click.echo("Running the theme")
       html = theme.render_html(toolset, config, body, css)
 
-      if keep_html:
-        html_location = '%s.html' % file_base
-      else:
-        html_location = os.path.join(tmpdir, "doc.html")
+      html_location = '%s.html' % file_base
+
+      # Save the cache
+      cache.persist()
 
       # Write HTML to file
-      with open(html_location, 'w') as f:
-        f.write(html)
+      try:
+        with io.open(html_location, 'w', encoding='utf-8') as f:
+          f.write(html)
 
-      pdf_location = '%s.pdf' % file_base
+        pdf_location = '%s.pdf' % file_base
 
-      # Run Prince XML
-      click.echo("Running Prince")
-      subprocess.check_call(['prince', html_location, pdf_location], stdout=DEVNULL)
+        # Run Prince XML
+        click.echo("Running Prince")
+        subprocess.check_call(['prince',
+                               html_location,
+                               pdf_location
+                              ], stdout=DEVNULL)
+      finally:
+        if not keep_html:
+          os.remove(html_location)
 
     finally:
       shutil.rmtree(tmpdir)

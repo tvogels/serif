@@ -1,10 +1,5 @@
 title: My Awesome Paper
 author: Thijs Vogels <t.vogels@me.com>
-authors:
-  - Thijs Vogels
-  - Brian McWilliams
-  - Jan Novák
-  - Fabrice Rousselle
 date: NOW
 locale: en_US
 bibliography:
@@ -26,12 +21,13 @@ counting:
     - .section4
 paper-size: A4
 font:
-  family: Helvetica Neue
+  family: Source Sans Pro
   size: 11
+  weight: 500
 math:
   enabled: true
   scale: 1.06
-  font-family: Helvetica Neue
+  font-family: Source Sans Pro
   display-alignment: left # left / center
 comments:
   enabled: true

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html lang="{{metadata.language}}">
+
+<head>
+  <meta charset="utf-8">
+  <title>{{config.title}}</title>
+  <meta name="author" content="{{config.author}}">
+  <meta name="subject" content="">
+  <meta name="keywords" content="">
+  <meta name="date" content="{{data.date}}">
+  <meta name="generator" content="Serif / Thijs Vogels">
+</head>
+
+<body>
+  <p class="top-date">{{data.date}}</p>
+
+  <img src="/Users/thijs/serif/invoice/icon.svg" alt="Thijs Vogels" class="logo">
+
+  <h1 class="invoice-title">
+  {% if config.language == "nl" %}Factuur{% else %}Invoice{% endif %}
+  </h1>
+
+  <div class="mydata">
+    <b class="naam">{{config.company.name}}</b><br>
+    {{config.company.address}}<br>
+    <a href="mailto:{{config.company.email}}">{{config.company.email}}</a> /
+    {{config.company.phone}}<br>
+    <b>IBAN /</b> {{config.company.iban}}<br>
+    <b>KvK /</b> {{config.company.kvk}}<br>
+    <b>{% if language == 'nl' %}BTW{% else %}VAT{% endif %}</b> {{config.company.vat}}
+  </div>
+
+  <div class="addressee">
+    <ul>
+      <li><span>{{#if lang-en}}Customer{{else}}Klant{{/if}}</span>{{data.customer.name}}</li>
+      <li><span>{{#if lang-en}}Address{{else}}Adres{{/if}}</span>{{data.customer.address}}</li>
+      <li><span>Project</span>{{data.project}}</li>
+      <li><span>{{#if lang-en}}Invoice{{else}}Factuur{{/if}}</span>{{data.invoice_no}}</li>
+      <li><span>{{#if lang-en}}Due date{{else}}Te voldoen{{/if}}</span>{{data.date}}</li>
+    </ul>
+  </div>
+
+  <div class="content">
+    <table class="content-table">
+      <thead>
+        <tr>
+          <th width="170">{% if language=='nl' %}Dienst{% else %}Service{% endif %}</th>
+          <th width="320">{% if language=='nl' %}Beschrijving{% else %}Description{% endif %}</th>
+          <th>{% if language=='nl' %}Prijs{% else %}Price{% endif %}</th>
+          <th width="10">{% if language=='nl' %}Aantal{% else %}Quantity{% endif %}</th>
+          <th>{% if language=='nl' %}Subtotaal{% else %}Sub total{% endif %}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for item in data.items %}
+        <tr>
+          <td><span class="dienst">{{item.service}}</span></td>
+          <td>{{item.description}}</td>
+          <td class="money">{{item.unit_price}}</td>
+          <td class="money">{{item.quantity}}</td>
+          <td class="money">{{item.prince}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2"></td>
+          <td>{% if language == 'nl' %}SUBTOTAAL{% else %}SUB TOTAL{% endif %}</td>
+          <td></td>
+          <td>TODO</td>
+        </tr>
+        <tr>
+          <td colspan="2"></td>
+          <td>{% if language == 'nl' %}BTW{% else %}VAT{% endif %}</td>
+          <td>{{data.btw_percentage}}</td>
+          <td>{{data.btw}}</td>
+        </tr>
+        <tr class="grand-total">
+          <td colspan="2"></td>
+          <td>{% if language == 'nl' %}TOTAAL{% else %}TOTAL{% endif %}</td>
+          <td></td>
+          <td>TODO</td>
+        </tr>
+      </tfoot>
+    </table>
+    <p>
+      {% if language == 'nl' %}
+
+      {% else %}
+
+
+      {% endif %}
+      {{#if lang-en}}
+        Please pay this invoice before {{dateFormat metadata.dueDate metadata.language}} to IBAN {{tempConf.iban}} (BIC {{tempConf.bic}}, {{tempConf.cname}}). Please mention the invoice number {{metadata.invoiceNo}}.
+      {{else}}
+        Gelieve het factuurbedrag voor {{dateFormat metadata.dueDate metadata.language}} over te maken op rekening {{tempConf.iban}} t.n.v. {{tempConf.cname}} onder vermelding van het factuurnummer {{metadata.invoiceNo}}.
+      {{/if}}
+    </p>
+    {{{body}}}
+    <p class="thanks">
+      {{#if lang-en}}
+        Thanks for the pleasant colaboration!
+      {{else}}
+        Bedankt voor de samenwerking!
+      {{/if}}
+    </p>
+    <p>
+      {{#if lang-en}}
+        If you have any questions about this invoice, please do not hesitate to contact me via <a href="mailto:{{tempConf.cmail}}">email</a> or phone ({{tempConf.cphone}}).</p>
+      {{else}}
+        Als u vragen heeft naar aanleiding van deze factuur, aarzel dan niet om contact met me op te nemen via <a href="mailto:{{tempConf.cmail}}">e-mail</a> of telefoon ({{tempConf.cphone}}).</p>
+      {{/if}}
+  </div>
+
+</body>
+
+</html>

@@ -30,7 +30,7 @@ function load(filename) {
   try {
     return fs.readFileSync(filename, 'utf-8');
   } catch (e) {
-    throw `Failed to load file '${filename}'`;
+    throw `Failed to load file '${filename}', error: ${JSON.stringify(e)}`;
   }
 }
 
@@ -43,7 +43,6 @@ function link(html) {
   counting($);
 
   toc($);
-
   // Load the bibliography if desired
   var bib = [];
   if (conf('bibliography','enabled'))
@@ -68,6 +67,7 @@ function counting($) {
       findfnc(selector+':not(.no-number)').each((i, match) => {
         var count = base + (i+1);
         $(match).attr('data-counter', count);
+        $(match).find('>h1:first-child,>h2:first-child,>h3:first-child,>h4:first-child,>h5:first-child,>h6:first-child,>caption,>figcaption').attr('data-counter', count);
         if (conf('counting', selector)) {
           setCounters($(match), conf('counting', selector), count+".");
         }
@@ -96,9 +96,14 @@ function toc($) {
 function loadBibliography() {
   var path = conf('bibliography','library');
   try {
-    return yaml.load(path);
+    var res = yaml.load(path);
+    if (typeof res === 'object' && res !== null) {
+      return res;
+    } else {
+      return {};
+    }
   } catch (e) {
-    throw `Failed to load bibliography file at '${path}'.`;
+    throw `Failed to load bibliography file at '${path}', error: ${JSON.stringify(e)}`;
   }
 }
 
@@ -107,7 +112,6 @@ function loadBibliography() {
  * Link cross-references, and set target counters
  */
 function references($, bib) {
-  var bibIds = Object.keys(bib);
   // Process links & prepare simple citations (not block)
   $("[href*='#']").each((i, reference) => {
     $this = $(reference);
@@ -118,12 +122,13 @@ function references($, bib) {
     } else {
       targetId = targetId.replace(/^bib:/,'');
       // Could be bibiliography ...
-      if (bibIds.indexOf(targetId) >= 0) {
+      if (bib[targetId] !== undefined) {
         $this.addClass('serif-citation-t');
         $this.attr('data-bib-id', targetId);
         $this.attr('href', `#bib:${targetId}`)
       } else {
         // not found
+        $this.text(`@${targetId}`)
         $this.addClass('serif-reference-not-found');
       }
     }
@@ -154,7 +159,7 @@ function citationsAndBibliography($, bib) {
 
   const citeproc = getCiteproc(bib);
 
-  var cite = (items) => {
+  const cite = (items) => {
     return citeproc.appendCitationCluster({
             citationItems: items,
             properties: {noteIndex: 0}
@@ -166,14 +171,40 @@ function citationsAndBibliography($, bib) {
     var cites = [];
     if ($this.hasClass('serif-citation-t')) {
       // Vogels (2006), single
-      cites = [{id: $this.attr('data-bib-id'), 'author-only': true}];
-      var part1 = cite(cites)[0][1];
-      cites = [{id: $this.attr('data-bib-id'), 'suppress-author': true}];
-      var part2 = cite(cites)[0][1];
+      const cite_id = $this.attr('data-bib-id');
+      // Check if there is a bibentry
+      if (bib[cite_id] === undefined) {
+        $this.text(`[@${cite_id}]`);
+        $this.addClass('serif-reference-not-found');
+        return;
+      }
+      try {
+        cites = [{id: cite_id, 'author-only': true}];
+        const part1 = cite(cites)[0][1];
+        cites = [{id: cite_id, 'suppress-author': true}];
+        const part2 = cite(cites)[0][1];
+      } catch (e) {
+        throw `Citing ${cite_id} failed (${JSON.stringify(e)}).`;
+      }
       $this.html(part1 + ' ' + part2)
     } else {
+      // Multiple, put in a block
       var data = JSON.parse($this.attr('data-items'));
-      var res = cite(data);
+
+      // Check the data
+      for (var i = data.length - 1; i >= 0; i--) {
+        var d = data[i];
+        if (bib[d.id] === undefined) {
+          $this.text(`[@${d.id}]`);
+          $this.addClass('serif-reference-not-found');
+          return;
+        }
+      };
+      try {
+        var res = cite(data);
+      } catch (e) {
+        throw `Citing ${JSON.stringify(data.map((d) => d.id))} failed.`;
+      }
       $this.html(res[0][1]);
       if (data.length == 1)
         $this.attr('href', `#bib:${data[0].id}`)

@@ -5,13 +5,22 @@
 <head>
 <title>{{config.title | e}}</title>
 <meta name="author" content="{{config.author | e}}">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <style>
 {{css}}
 </style>
 </head>
 
 <body>
-<h1>{{config.title | e}}</h1>
+<header class="doc-title-block">
+<div class="doc-title">{{config.title | e}}</div>
+<ul class="doc-authors">
+  {% for author in config.authors %}
+  <li class="doc-author">{{author | e}}</li>
+  {% endfor %}
+</ul>
+<div class="doc-date">{{config.date | e}}</div>
+</header>
 {{body}}
 </body>
 

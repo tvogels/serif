@@ -1,0 +1,24 @@
+title:
+author: Thijs Vogels <t.vogels@me.com>
+date: NOW
+locale: nl.NL
+bibliography:
+  enabled: false
+paper-size: A4
+font:
+  family: Source Sans Pro
+  size: 11
+  weight: 500
+math:
+  enabled: false
+comments:
+  enabled: false
+company:
+  name: Thijs Vogels Internettoepassingen
+  address: Oudestraat 109, 5421 WD  GEMERT
+  email: info@tvogels.nl
+  phone: +41 (0)76 233 2009
+  iban: NL30 RABO 0106 5693 41
+  kvk: 55555012
+  vat: NL210925383B01
+  bic: RABONL2U

@@ -2,12 +2,13 @@ import markdown
 from markdown.inlinepatterns import Pattern
 from markdown.util import etree
 import raw_html
-import math_pattern
+import math
 import sys
 from util import get
 import citations
 from placeholders import BibliographyProcessor, ListOfFiguresProcessor, PageBreakProcessor
 from includes import IncludesProcessor
+from no_wrap import no_wrap
 from comments import marker_pattern, comment_pattern
 
 
@@ -16,9 +17,10 @@ from markdown.treeprocessors import Treeprocessor
 
 class SerifExtension(markdown.extensions.Extension):
 
-  def __init__(self, serif_config, **kwargs):
+  def __init__(self, serif_config, cache, **kwargs):
     self.config = {}
     self.serif_config = serif_config
+    self.cache = cache
     super(SerifExtension, self).__init__(**kwargs)
 
   def extendMarkdown(self, md, md_globals):
@@ -26,8 +28,10 @@ class SerifExtension(markdown.extensions.Extension):
 
     c = self.serif_config
 
+    md.inlinePatterns.add('no_wrap', no_wrap, "<strong")
+
     if get(c, 'math', 'enabled'):
-      md.inlinePatterns.add('math', math_pattern.MathPattern(c), "<strong")
+      md.inlinePatterns.add('math', math.MathPattern(c, self.cache('svgmath')), ">no_wrap")
       md.postprocessors.add('raw', raw_html.RawPostprocessor(), "_end")
 
 

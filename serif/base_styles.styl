@@ -1,2 +1,192 @@
-test(a, b)
-  a + b
+/**
+ * Show page-layout on screen
+ */
+@media screen
+  body
+    max-width 40em
+    margin 1em auto
+    padding 3em 4em
+    background-color white
+    border 1px solid #ddd
+    text-rendering optimizeLegibility
+    @media screen and (max-width: 40em)
+      margin 0
+      border 0
+      padding 1.3em
+  html
+    background-color #f0f0f0
+
+
+/**
+ * Style links
+ */
+a[href]
+  text-decoration none
+
+
+a.serif-citation-block
+a.serif-reference
+a.serif-citation-t
+.toc a
+  color inherit !important
+  text-decoration none !important
+
+/**
+ * Basic references
+ */
+a[data-reference-type="fig"]
+a[data-reference-type="thm"]
+a[data-reference-type="eq"]
+a[data-reference-type="eqn"]
+a[data-reference-type="proof"]
+a[data-reference-type="tab"]
+  &:before
+    content: attr(data-target-counter)
+
+/**
+ * Images should never overflow
+ */
+img
+  max-width: 100%
+
+/**
+ * Default typography
+ */
+$line-height = 3ex
+body
+  font (config_font_size)pt/$line-height config_font_family
+@page
+  @bottom
+    font (config_font_size)pt/$line-height config_font_family
+  @left
+    font (config_font_size)pt/$line-height config_font_family
+  @right
+    font (config_font_size)pt/$line-height config_font_family
+  @top
+    font (config_font_size)pt/$line-height config_font_family
+
+@page
+  size: config_paper-size
+
+/**
+ * Errors
+ */
+.serif-reference-not-found, a.serif-reference-not-found
+  color red !important
+
+/**
+ * Equation defaults
+ */
+.eqn-display
+  display block
+  padding 3ex 0
+  text-align center
+  page-break-before avoid
+
+/**
+ * Tables and TOC should by default have the right type of numbers
+ */
+table, .toc
+  font-variant: prince-opentype(tnum);
+
+/**
+ * Floats
+ */
+@media print
+  [float]
+    float top
+  [float="bottom"]
+    float bottom
+  [float="top unless-fit"]
+    float top unless-fit
+  [float="bottom unless-fit"]
+    float bottom unless-fit
+  [float="top next"]
+    float top next
+  [float="bottom next"]
+    float bottom next
+  [float="snap"]
+    float prince-snap
+
+
+/**
+ * No-break class
+ */
+.no-break
+  prince-wrap-inside avoid
+  white-space nowrap
+
+
+/**
+ * Helper functions
+ */
+page-margin(inside, outside=inside, top=inside, bottom=top)
+  @page
+    margin-inside inside
+    margin-outside outside
+    margin-top top
+    margin-bottom bottom
+
+page-break-before(selector)
+  {selector}
+    page-break-before always
+
+justify(hyphenate=true, max_hyphens=2)
+  p
+  .csl-entry
+  figcaption
+  li
+    text-align justify
+    if hyphenate
+      hyphens  auto
+      prince-hyphenate-lines max_hyphens
+    @media screen and (max-width: 40em)
+      hyphens: none
+      text-align left
+
+basic-bibliopgrahy()
+  $indent-amount = 2em
+  #serif-bibliography
+    >.csl-entry
+      padding-left $indent-amount
+      text-indent -1*$indent-amount
+    .csl-left-margin
+      text-indent 0
+      width $indent-amount
+      display inline-block
+    .csl-right-inline
+      display inline
+
+
+page-numbers(position = 'bottom-center', show_total=false)
+@page
+  if position == 'bottom-center'
+    @bottom
+      content: counter(page)
+  if position == 'bottom-right'
+    @bottom
+      @bottom-right
+        content: counter(page)
+
+screen-block(bgcolor = #fafafa)
+  border = 1px solid #ddd
+  spacing = 1em
+  @media screen
+    border-top border
+    border-bottom border
+    background-color bgcolor
+    margin-left -1*spacing
+    margin-right -1*spacing
+    padding 2ex spacing
+
+equation-ids()
+  .eqn-display[id]
+    position relative
+    &::after
+      content "(" attr(data-counter) ")"
+      position absolute
+      right 0
+      top 50%
+      margin-top -2.5ex
+
+

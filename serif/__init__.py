@@ -137,7 +137,8 @@ def get_linker(config):
 @click.command()
 @click.argument('input_path', type=click.Path(exists=True))
 @click.option('--keep-html/--no-keep-html', default=False)
-def cli(input_path, keep_html):
+@click.option('--make-pdf/--no-make-pdf', default=True)
+def cli(input_path, keep_html, make_pdf):
 
   if not which('stylus'):
     terminate("I cannot find the stylus binary.")
@@ -223,18 +224,18 @@ def cli(input_path, keep_html):
         with io.open(html_location, 'w', encoding='utf-8') as f:
           f.write(html)
 
-        pdf_location = '%s.pdf' % file_base
+        if make_pdf:
+            pdf_location = '%s.pdf' % file_base
 
-        # Run Prince XML
-        click.echo("Running Prince")
-        subprocess.check_call(['prince',
-                               html_location,
-                               pdf_location
-                              ], stdout=DEVNULL)
+            # Run Prince XML
+            click.echo("Running Prince")
+            subprocess.check_call(['prince',
+                                   html_location,
+                                   pdf_location
+                                  ], stdout=DEVNULL)
       finally:
         if not keep_html:
           os.remove(html_location)
 
     finally:
       shutil.rmtree(tmpdir)
-

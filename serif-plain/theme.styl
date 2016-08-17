@@ -58,6 +58,16 @@ figure
 theorem
   page-break-inside avoid
 
+// Comments
+.serif-comment
+  color purple
+  background-color desaturate(lighten(purple, 80%), 50%)
+  padding 0 .2em
+  display inline-block
+  border-radius .2em
+.serif-comment-author
+  &:after
+    content: ": "
 
 // Title block
 .doc-title-block

@@ -34,21 +34,36 @@ function load(filename) {
   }
 }
 
+function log(str) {
+  fs.appendFile('/home/thijs/Desktop/log.txt', str + "\n", function (err) {});
+}
+
 /**
  * Main function, takes HTML and applies all the edits to it.
  */
 function link(html) {
   const $ = Cheerio.load(html);
 
+  log("Data loaded");
+
   counting($);
 
+  log("Couting done");
+
   toc($);
+
+  log("Toc made");
+
   // Load the bibliography if desired
   var bib = [];
   if (conf('bibliography','enabled'))
     bib = loadBibliography();
 
+  log("Bib loaded");
+
   references($, bib);
+
+  log("References done");
 
   if (conf('bibliography','enabled'))
     citationsAndBibliography($, bib);
@@ -90,19 +105,40 @@ function toc($) {
   });
 }
 
+function transformBibEntry(key, data) {
+  data['id'] = key;
+  if (data['issued'] && Array.isArray(data['issued'])) {
+    var parts = data['issued'][0];
+    var a = [];
+    if (parts['year']) a.push(parseInt(parts['year']));
+    if (parts['month']) a.push(parseInt(parts['month']));
+    if (parts['day']) a.push(parseInt(parts['day']));
+    data['issued'] = {'date-parts': [a]};
+  }
+}
+
 /**
  * Load the bibliography
  */
 function loadBibliography() {
   var path = conf('bibliography','library');
+  log("loading from " + path);
   try {
     var res = yaml.load(path);
+    log("json loaded");
     if (typeof res === 'object' && res !== null) {
+      for (k in res) {
+        if (res.hasOwnProperty(k)) {
+          transformBibEntry(k, res[k]);
+        }
+      }
+      log(JSON.stringify(res));
       return res;
     } else {
       return {};
     }
   } catch (e) {
+    log(`Failed to load bibliography file at '${path}', error: ${JSON.stringify(e)}`);
     throw `Failed to load bibliography file at '${path}', error: ${JSON.stringify(e)}`;
   }
 }

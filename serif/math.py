@@ -36,6 +36,7 @@ class MathPattern(Pattern):
       raise ValueError('Expecting either 1 or 2 $\'s.')
     formula = m.group(3).strip()
     try:
+      formula = formula.replace("_BR_",'\\\\')
       click.echo("Rendering equation '%s'" % formula)
       rendered = render(formula, mode)
     except:

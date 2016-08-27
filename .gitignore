@@ -63,3 +63,6 @@ target/
 
 testbib.yaml
 serif/out.html
+
+.DS_Store
+._.DS_Store

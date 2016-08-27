@@ -82,7 +82,7 @@ function counting($) {
       findfnc(selector+':not(.no-number)').each((i, match) => {
         var count = base + (i+1);
         $(match).attr('data-counter', count);
-        $(match).find('>h1:first-child,>h2:first-child,>h3:first-child,>h4:first-child,>h5:first-child,>h6:first-child,>caption,>figcaption').attr('data-counter', count);
+        $(match).find('>h1:first-child,>h2:first-child,>h3:first-child,>h4:first-child,>h5:first-child,>h6:first-child,caption,figcaption').attr('data-counter', count);
         if (conf('counting', selector)) {
           setCounters($(match), conf('counting', selector), count+".");
         }

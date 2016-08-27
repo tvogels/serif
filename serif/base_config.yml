@@ -7,6 +7,8 @@ markdown:
     - toc
     - outline
   extension_configs:
-    toc: 
+    toc:
       marker: \toc()
       title: Table of Contents
+debug:
+  false

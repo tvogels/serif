@@ -84,6 +84,15 @@ body
   text-align center
   page-break-before avoid
 
+  if config_debug
+    &:before
+      position absolute
+      left 0
+      top 0
+      color #bbb
+      font-size 0.9em
+      content: attr(id)
+
 /**
  * Tables and TOC should by default have the right type of numbers
  */

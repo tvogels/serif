@@ -31,7 +31,7 @@ class SerifExtension(markdown.extensions.Extension):
     md.inlinePatterns.add('no_wrap', no_wrap, "<strong")
 
     if get(c, 'math', 'enabled'):
-      md.inlinePatterns.add('math', math.MathPattern(c, self.cache('svgmath')), ">no_wrap")
+      md.inlinePatterns.add('math', math.MathPattern(c, self.cache('svgmath')), "<backtick")
       md.postprocessors.add('raw', raw_html.RawPostprocessor(), "_end")
 
 

@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html lang="{{config.language | e}}">
+
+<head>
+<title>{{config.title | e}}</title>
+<meta name="author" content="{{config.author | e}}">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style>
+{{css}}
+</style>
+</head>
+
+<body>
+<header class="doc-title-block">
+Thijs Vogels
+<div class="doc-title">{{config.title | e}}</div>
+<div class="doc-authors">
+  <span>Master’s thesis</span> by {{config.authors[0] | e}}<br>
+  at ETH Zürich <i>&amp;</i> Disney Research Zürich<br>
+  March 2015 – September 2016
+</div>
+<div class="doc-supervisor-heading">Supervisor</div>
+<div class="doc-supervisor">
+{{config.supervisor | e}}
+</div>
+<ul class="doc-advisors">
+  <li class="doc-advisor-heading">Advisors</li>
+  {% for advisor in config.advisors %}
+  <li class="doc-advisor">{{advisor | e}}</li>
+  {% endfor %}
+</ul>
+<div class="doc-logos">
+  <img src="images/eth-logo.svg" class="doc-eth-logo" alt="" width="22%">
+  <img src="images/drz-logo.png" class="doc-drz-logo" alt="" width="40%">
+</div>
+</header>
+{{body}}
+</body>
+
+</html>

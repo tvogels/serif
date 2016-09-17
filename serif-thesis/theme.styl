@@ -1,0 +1,363 @@
+
+page-margin(inside: 3.3cm, outside: 3.3cm, top=2.5cm)
+
+justify()
+basic-bibliopgrahy()
+page-numbers(position='bottom-right', show_total=true)
+equation-ids()
+
+$line-height = 1em
+$accent-color = #0096D6
+
+.page-reset
+  counter-reset page 1
+
+*
+  font-weight config_font_weight
+  box-sizing border-box
+
+h1, h2, h3, h4, h5, h6
+  font-weight 500
+  &[data-counter]::before
+    content attr(data-counter)
+    padding-right .5em
+
+h1, h2, , .toctitle
+  font-family config_font_headerFamily
+
+h1, .toctitle
+  padding-top 2em
+  margin-bottom 1.5em
+  font-size 2em
+  line-height $line-height
+  display block
+
+h1[data-counter]
+  $indent = 1.4em
+  // margin-left $indent
+  &::before
+    margin-left -1 * $indent
+    content attr(data-counter) " |"
+    color $accent-color
+    font-weight 500
+    display inline-block
+    padding-right 0
+    width $indent
+    line-height @line-height
+
+h2
+  font-size 1.5em
+  line-height $line-height
+  margin-top 2.5em
+  margin-bottom 1.5em
+
+h3
+  margin-top: 2em
+
+.section1
+  margin-top 4em
+
+h3,h4,h5,h6
+  font-size 1em
+  line-height @line-height
+
+p
+  margin .7em 0
+
+.csl-entry
+  margin-bottom 1ex
+
+
+figure
+  display block
+  margin 2em 0
+  screen-block()
+  padding-bottom .75em
+  border-bottom .5pt solid $accent-color
+  > p
+    margin 0
+  img
+    display block
+    margin .5em auto
+    margin-top 0
+  figcaption
+    display block
+    &:before
+      color $accent-color
+      content "Figure " attr(data-counter) ":"
+      padding-right .5em
+      font-weight 600
+
+table[id]
+  padding-bottom .25em
+  padding-top .25em
+  border-bottom .5pt solid $accent-color
+  border-top .5pt solid $accent-color
+  margin 2em 0
+  td, th, li
+    text-align left
+    vertical-align top
+  ul
+    margin 0
+    list-style none
+    li
+      margin 0
+      padding-left 1em
+      text-indent -1em
+  screen-block()
+  caption
+    padding 0.5em 0
+    &:before
+      color $accent-color
+      content "Table " attr(data-counter) ":"
+      padding-right .5em
+      font-weight 600
+
+
+.image-row
+  margin .5em auto
+  &:after
+    content ""
+    display table
+    clear both
+  .image-container
+    float left
+
+
+.image-container
+  display block
+  position relative
+
+  &.bordered
+    padding .1em
+
+  .bottom-label
+    font-family "Helvetica Neue"
+    display block
+    text-align center
+
+  .inner-label
+    position absolute
+    left .2em
+    bottom .2em
+    font-family "Helvetica Neue"
+    font-size .8em
+    &.white
+      color white
+      display inline-block
+      padding .1em 0.3em
+      border-radius .3em
+      background-color rgba(0, 0, 0, 0.4)
+      line-height 1.3em
+
+  img
+    display block
+    margin 0 auto
+
+
+
+figure
+theorem
+  page-break-inside avoid
+
+// Comments
+.serif-comment
+  color purple
+  background-color desaturate(lighten(purple, 80%), 50%)
+  padding 0 .2em
+  display inline-block
+  border-radius .2em
+.serif-comment-author
+  &:after
+    content: ": "
+
+// Title block
+.doc-title-block
+  // text-align center
+  margin 2em 0
+  @media print
+    margin 0
+  font-family Skolar PE
+  font-size 1.25em
+.doc-title
+  font-size 2.24em
+  text-transform uppercase
+  font-weight 600
+  line-height $line-height
+  padding 1.5em 0
+  padding-bottom 1em
+.doc-authors
+  list-style none
+  padding 0
+  font-size 1.3em
+  font-style italic
+  margin-top 1.2em
+  span
+    font-weight 500
+    color $accent-color
+  line-height 1.2*$line-height
+.doc-advisors
+  margin-top 2.5em
+  list-style none
+  padding 0
+  margin 1.5ex 0
+  line-height $line-height
+.doc-advisor-heading, .doc-supervisor-heading
+  padding 0
+  margin 0
+  margin-top 2.5em
+.doc-advisor
+  font-size 1.3em
+  font-style italic
+  padding 0
+  margin 0
+  line-height 1.2*$line-height
+.doc-supervisor
+  font-size 1.3em
+  font-style italic
+  line-height 1.2*$line-height
+.doc-drz-logo
+  position absolute
+  bottom -18px
+  left -15px
+.doc-eth-logo
+  position absolute
+  bottom 11px
+  right 0
+
+ul
+  padding 0
+  margin 0.7em 0
+  li
+    padding 0
+    margin 0
+    margin-left 1.5em
+
+
+
+// Table of Contents
+.toc
+  screen-block()
+  margin 3ex 0
+  padding 2ex 0
+  page:toc
+  ul
+    list-style none
+    margin 0
+    padding 0
+  li
+    margin 0
+    padding 0
+  a
+    &:before
+      display inline-block
+      width 2em
+    &[data-target-counter]:before
+      content attr(data-target-counter) ". "
+
+    &:after
+      content: leader(' . ') target-counter(attr(href),page)
+  >ul>li
+    margin-top $line-height
+  >ul>li>a
+    font-weight 600
+    &:after
+      content: leader(' ') target-counter(attr(href),page)
+  >ul>li>ul>li>a
+    padding-left: 2em
+  >ul>li>ul>li>ul>li
+    >a:before {
+      width auto
+      padding-right:.3em
+    }
+    padding-left 4em
+    // font-style italic
+
+.eqn-display[id]
+  &::after
+    display block
+    color $accent-color
+    border .4pt solid $accent-color
+    // vertical-align 50%
+    line-height 1em
+    padding .1em .2em
+    padding-bottom 0em
+    margin-top -2.2ex
+    @media print
+      line-height 1em
+      padding .2em
+      margin-top -1.75ex
+    content attr(data-counter)
+
+.acknowledgements
+  margin 7cm 2cm
+  page toc
+
+.acknowledgements-title
+  font-size 1.5em
+  text-align center
+  font-family Skolar PE
+  margin-bottom 1em
+
+strong
+  color $accent-color
+  font-weight 600
+
+
+@page:right
+  @bottom-right
+    margin-top 14pt
+    width 2em
+    vertical-align top
+    font 10pt/14pt "Skolar PE"
+    font-weight 600
+    content counter(page)
+    color $accent-color
+    border-top 0.6pt solid $accent-color
+
+
+@page:left
+  @bottom-left {
+    margin-top 14pt
+    width 2em
+    vertical-align top
+    font 10pt/14pt "Skolar PE"
+    font-weight 600
+    content counter(page)
+    color $accent-color
+    border-top 0.6pt solid $accent-color
+  }
+
+
+@page:blank
+  @bottom-right
+    content ""
+    border-top 0.6pt solid #fff
+  @bottom-left
+    content ""
+    border-top 0.6pt solid #fff
+
+@page toc
+  @bottom-right
+    content ""
+    border-top 0.6pt solid #fff
+  @bottom-left
+    content ""
+    border-top 0.6pt solid #fff
+
+
+
+@page:first
+  margin-top 4cm
+  @bottom-right
+    border-top 0.6pt solid #fff
+    content: ""
+
+
+
+
+@css {
+  .section1, .toc, .acknowledgements {
+    page-break-before: right;
+  }
+}

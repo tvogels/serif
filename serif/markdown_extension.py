@@ -28,10 +28,10 @@ class SerifExtension(markdown.extensions.Extension):
 
     c = self.serif_config
 
-    md.inlinePatterns.add('no_wrap', no_wrap, "<strong")
+    md.inlinePatterns.add('no_wrap', no_wrap, "<backtick")
 
     if get(c, 'math', 'enabled'):
-      md.inlinePatterns.add('math', math.MathPattern(c, self.cache('svgmath')), "<backtick")
+      md.inlinePatterns.add('math', math.MathPattern(c, self.cache('svgmath')), ">no_wrap")
       md.postprocessors.add('raw', raw_html.RawPostprocessor(), "_end")
 
 

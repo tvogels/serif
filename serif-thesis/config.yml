@@ -1,0 +1,34 @@
+title: My Awesome Paper
+author: Thijs Vogels <t.vogels@me.com>
+date: NOW
+locale: en_US
+bibliography:
+  enabled: true
+  style: chicago-author-date
+counting:
+  root:
+    - .section1
+  .section1:
+    - .section2
+    - figure
+    - theorem
+    - table
+    - .eqn-display[id]
+    - listing
+  .section2:
+    - .section3
+  .section3:
+    - .section4
+paper-size: A4
+font:
+  family: Helvetica Neue
+  headerFamily: Skolar PE
+  size: 10
+  weight: 400
+math:
+  enabled: true
+  scale: 1.06
+  font-family: Helvetica Neue
+  display-alignment: left # left / center
+comments:
+  enabled: true

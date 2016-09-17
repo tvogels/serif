@@ -5,7 +5,7 @@ from markdown.util import etree
 PATTERNS = []
 
 # Math patterns
-MATH_AFTER   = r"""[,\.\-;!\?\)\]]"""
+MATH_AFTER   = r"""[,\.\-:;!\?\)\]]"""
 MATH_BEFORE  = r"""[\(\[]"""
 PATTERNS.append(r"""(%s\$[^\$]+\$%s*)""" % (MATH_BEFORE, MATH_AFTER))
 PATTERNS.append(r"""(%s?\$[^\$]+\$%s+)""" % (MATH_BEFORE, MATH_AFTER))
